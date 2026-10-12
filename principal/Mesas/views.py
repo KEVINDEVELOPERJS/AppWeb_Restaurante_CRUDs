@@ -2,6 +2,8 @@ from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from principal.mixins import ProtectedDeleteMixin
+
 from Mesas.models import Mesa, Zona
 from Mesas.api.serializers import (
     MesaSerializer,
@@ -10,14 +12,14 @@ from Mesas.api.serializers import (
 )
 
 
-class ZonaViewSet(viewsets.ModelViewSet):
+class ZonaViewSet(ProtectedDeleteMixin, viewsets.ModelViewSet):
     queryset = Zona.objects.all()
     serializer_class = ZonaSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre']
 
 
-class MesaViewSet(viewsets.ModelViewSet):
+class MesaViewSet(ProtectedDeleteMixin, viewsets.ModelViewSet):
     queryset = Mesa.objects.select_related('zona').all()
     serializer_class = MesaSerializer
 

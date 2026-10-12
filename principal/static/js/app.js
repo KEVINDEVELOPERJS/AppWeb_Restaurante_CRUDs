@@ -177,6 +177,9 @@ async function pedir(url, opciones = {}) {
 // Convierte los errores de validación de DRF en un texto entendible.
 function textoDeError(datos, status) {
   if (datos && typeof datos === 'object') {
+    // Errores generales (por ejemplo, al no poder eliminar por relaciones).
+    if (datos.detail) return String(datos.detail);
+
     const partes = Object.entries(datos).map(([campo, valor]) => {
       const texto = Array.isArray(valor) ? valor.join(', ') : String(valor);
       return `${campo}: ${texto}`;
