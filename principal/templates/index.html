@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurante · Panel CRUD</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Restaurante · Panel de CRUDs</h1>
+    <nav id="tabs">
+      <button type="button" data-recurso="categorias" class="activo">Categorías</button>
+      <button type="button" data-recurso="platos">Platos</button>
+      <button type="button" data-recurso="zonas">Zonas</button>
+      <button type="button" data-recurso="mesas">Mesas</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="seccion">
+      <h2 id="titulo">CRUD de Categorías</h2>
+
+      <!-- Aquí se muestran los mensajes de éxito o error -->
+      <div id="mensaje" class="mensaje"></div>
+
+      <!-- Formulario para crear / editar (se construye desde JavaScript) -->
+      <form id="formulario"></form>
+
+      <div class="barra-tabla">
+        <strong>Registros</strong>
+        <input type="text" id="busqueda" placeholder="Buscar...">
+      </div>
+
+      <!-- Tabla de datos (GET) -->
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr id="encabezados"></tr>
+          </thead>
+          <tbody id="cuerpo"></tbody>
+        </table>
+      </div>
+
+      <div id="paginacion" class="paginacion"></div>
+    </section>
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
