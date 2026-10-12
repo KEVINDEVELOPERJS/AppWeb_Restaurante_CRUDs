@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "rest_framework",
     "Platos",
+    "Mesas",
 ]
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -64,7 +65,7 @@ ROOT_URLCONF = "principal.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -125,6 +126,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Carpetas extra donde Django busca archivos estáticos (frontend)
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Media files (uploads)
 MEDIA_URL = "media/"
