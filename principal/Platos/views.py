@@ -3,6 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
+from principal.mixins import ProtectedDeleteMixin
+
 from Platos.models import Plato, Categoria
 from Platos.api.serializers import (
     PlatoSerializer,
@@ -11,14 +13,14 @@ from Platos.api.serializers import (
 )
 
 
-class CategoriaViewSet(viewsets.ModelViewSet):
+class CategoriaViewSet(ProtectedDeleteMixin, viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre']
 
 
-class PlatoViewSet(viewsets.ModelViewSet):
+class PlatoViewSet(ProtectedDeleteMixin, viewsets.ModelViewSet):
     queryset = Plato.objects.select_related('categoria').all()
     serializer_class = PlatoSerializer
     parser_classes = [MultiPartParser, FormParser, JSONParser]
