@@ -29,6 +29,7 @@ urlpatterns = [
     path("", TemplateView.as_view(template_name="index.html"), name="frontend"),
     path("api/", include("Platos.api.router")),
     path("api/", include("Mesas.api.router")),
+    path("api/", include("Pedidos.api.router")),
     path(
         "swagger<format>/", schema_view.without_ui(cache_timeout=0), name="schema-json"
     ),
