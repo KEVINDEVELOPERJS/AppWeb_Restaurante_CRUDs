@@ -107,6 +107,34 @@ const RECURSOS = {
       { campo: 'descripcion', etiqueta: 'Descripción', tipo: 'textarea' },
     ],
   },
+
+  pedidos: {
+    titulo: 'Pedidos',
+    endpoint: '/api/pedidos/',
+    columnas: [
+      { campo: 'id', etiqueta: 'ID' },
+      { campo: 'mesa_numero', etiqueta: 'Mesa' },
+      { campo: 'plato_nombre', etiqueta: 'Plato' },
+      { campo: 'cantidad', etiqueta: 'Cantidad' },
+      { campo: 'total', etiqueta: 'Total' },
+      { campo: 'estado', etiqueta: 'Estado' },
+    ],
+    campos: [
+      { campo: 'mesa', etiqueta: 'Mesa', tipo: 'fk', fuente: '/api/mesas/', textoCampo: 'numero', requerido: true },
+      { campo: 'plato', etiqueta: 'Plato', tipo: 'fk', fuente: '/api/platos/', textoCampo: 'nombre', requerido: true },
+      { campo: 'cantidad', etiqueta: 'Cantidad', tipo: 'number', defecto: 1, requerido: true },
+      {
+        campo: 'estado', etiqueta: 'Estado', tipo: 'select', defecto: 'PENDIENTE',
+        opciones: [
+          { valor: 'PENDIENTE', texto: 'Pendiente' },
+          { valor: 'EN_PREPARACION', texto: 'En preparación' },
+          { valor: 'ENTREGADO', texto: 'Entregado' },
+          { valor: 'CANCELADO', texto: 'Cancelado' },
+        ],
+      },
+      { campo: 'observaciones', etiqueta: 'Observaciones', tipo: 'textarea' },
+    ],
+  },
 };
 
 /* -------------------------------------------------------------------------

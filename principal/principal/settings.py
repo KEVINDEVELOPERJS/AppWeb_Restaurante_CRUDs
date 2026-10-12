@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "Platos",
     "Mesas",
+    "Pedidos",
 ]
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
