@@ -113,16 +113,32 @@ const RECURSOS = {
     endpoint: '/api/pedidos/',
     columnas: [
       { campo: 'id', etiqueta: 'ID' },
+      { campo: 'zona_nombre', etiqueta: 'Zona' },
       { campo: 'mesa_numero', etiqueta: 'Mesa' },
+      { campo: 'categoria_nombre', etiqueta: 'Categoría' },
       { campo: 'plato_nombre', etiqueta: 'Plato' },
+      { campo: 'precio_unitario', etiqueta: 'Precio' },
       { campo: 'cantidad', etiqueta: 'Cantidad' },
       { campo: 'total', etiqueta: 'Total' },
       { campo: 'estado', etiqueta: 'Estado' },
     ],
+    // Todo se selecciona (nada se escribe) para que el mesero sea rápido.
+    // Zona y Categoría solo filtran las listas de Mesa y Plato: no se envían a la API.
     campos: [
-      { campo: 'mesa', etiqueta: 'Mesa', tipo: 'fk', fuente: '/api/mesas/', textoCampo: 'numero', requerido: true },
-      { campo: 'plato', etiqueta: 'Plato', tipo: 'fk', fuente: '/api/platos/', textoCampo: 'nombre', requerido: true },
-      { campo: 'cantidad', etiqueta: 'Cantidad', tipo: 'number', defecto: 1, requerido: true },
+      { campo: 'zona', etiqueta: 'Zona', tipo: 'fk', fuente: '/api/zonas/', textoCampo: 'nombre', requerido: true, soloFiltro: true },
+      {
+        campo: 'mesa', etiqueta: 'Mesa', tipo: 'fk', fuente: '/api/mesas/', dependeDe: 'zona', requerido: true,
+        texto: (mesa) => `Mesa ${mesa.numero} (${mesa.capacidad} personas)`,
+      },
+      { campo: 'categoria', etiqueta: 'Categoría', tipo: 'fk', fuente: '/api/categorias/', textoCampo: 'nombre', requerido: true, soloFiltro: true },
+      {
+        campo: 'plato', etiqueta: 'Plato', tipo: 'fk', fuente: '/api/platos/?estado=DISPONIBLE', dependeDe: 'categoria', requerido: true,
+        texto: (plato) => `${plato.nombre} - $${plato.precio}`,
+      },
+      {
+        campo: 'cantidad', etiqueta: 'Cantidad', tipo: 'select', defecto: '1',
+        opciones: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({ valor: String(n), texto: String(n) })),
+      },
       {
         campo: 'estado', etiqueta: 'Estado', tipo: 'select', defecto: 'PENDIENTE',
         opciones: [
@@ -132,7 +148,6 @@ const RECURSOS = {
           { valor: 'CANCELADO', texto: 'Cancelado' },
         ],
       },
-      { campo: 'observaciones', etiqueta: 'Observaciones', tipo: 'textarea' },
     ],
   },
 };
@@ -296,6 +311,17 @@ async function renderFormulario(valores = null) {
   }
   form.appendChild(grid);
 
+  // Selects que dependen de otro (ej: Mesa depende de Zona): se llenan
+  // según lo elegido en el otro select y se recargan cuando este cambia.
+  for (const campo of recurso.campos) {
+    if (campo.dependeDe) {
+      const padre = document.getElementById(`f-${campo.dependeDe}`);
+      const hijo = document.getElementById(`f-${campo.campo}`);
+      padre.addEventListener('change', () => llenarSelectFk(hijo, campo));
+      await llenarSelectFk(hijo, campo, valores ? valores[campo.campo] : undefined);
+    }
+  }
+
   const acciones = document.createElement('div');
   acciones.className = 'acciones-form';
 
@@ -365,7 +391,7 @@ async function crearCampo(campo, valores) {
     campo.opciones.forEach((op) => input.add(new Option(op.texto, op.valor)));
     input.value = (valor !== undefined && valor !== null) ? String(valor) : (campo.defecto || '');
   } else if (campo.tipo === 'fk') {
-    await llenarSelectFk(input, campo, valor);
+    if (!campo.dependeDe) await llenarSelectFk(input, campo, valor); // los dependientes se llenan en renderFormulario
   } else {
     if (valor !== undefined && valor !== null) {
       input.value = valor;
@@ -379,12 +405,21 @@ async function crearCampo(campo, valores) {
 
 async function llenarSelectFk(select, campo, valor) {
   try {
-    const datos = cacheFk[campo.fuente] || await pedir(campo.fuente);
-    cacheFk[campo.fuente] = datos;
+    let url = campo.fuente;
+    if (campo.dependeDe) {
+      // Filtra con lo elegido en el otro select, ej: /api/mesas/?zona=2
+      const valorPadre = document.getElementById(`f-${campo.dependeDe}`).value;
+      url += (url.includes('?') ? '&' : '?') + `${campo.dependeDe}=${valorPadre}`;
+    }
+    const datos = cacheFk[url] || await pedir(url);
+    if (!campo.dependeDe) cacheFk[url] = datos;
     const opciones = listaDe(datos);
     select.innerHTML = '';
     if (!campo.requerido) select.add(new Option('(ninguna)', ''));
-    opciones.forEach((item) => select.add(new Option(item[campo.textoCampo], item.id)));
+    opciones.forEach((item) => {
+      const texto = campo.texto ? campo.texto(item) : item[campo.textoCampo];
+      select.add(new Option(texto, item.id));
+    });
     if (valor !== undefined && valor !== null) select.value = String(valor);
   } catch (error) {
     select.innerHTML = '';
@@ -398,6 +433,7 @@ function recolectarDatos() {
   const datos = {};
 
   recurso.campos.forEach((campo) => {
+    if (campo.soloFiltro) return; // Zona y Categoría en Pedidos solo filtran
     const input = document.getElementById(`f-${campo.campo}`);
 
     if (campo.tipo === 'checkbox') {

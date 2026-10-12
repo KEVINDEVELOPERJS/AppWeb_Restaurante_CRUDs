@@ -26,6 +26,8 @@ class PedidosApiTests(TestCase):
         self.assertEqual(respuesta.status_code, 201)
         self.assertEqual(Pedido.objects.count(), 1)
         self.assertEqual(respuesta.data['total'], '70000.00')
+        self.assertEqual(respuesta.data['zona_nombre'], 'Salón')
+        self.assertEqual(respuesta.data['categoria_nombre'], 'Platos fuertes')
 
     def test_no_permite_plato_agotado(self):
         self.plato.estado = Plato.Estado.AGOTADO
